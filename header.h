@@ -29,7 +29,10 @@ public:
 	{ 
 		word = new string(*(object.word)); 
 	}
-
+	virtual bool operator == (char str[]) const
+	{
+		return *word == str;
+	}
 	virtual ~Word_string() 
 	{ 
 		delete word; 
@@ -50,8 +53,7 @@ public:
 	Unique_word(const Unique_word &obj);
 	~Unique_word();
 
-	bool operator == (const Unique_word &obj) const;
-	Unique_word & operator = (const Unique_word &obj);
+	void operator = (const Unique_word &obj);
 	bool get_flag() const;
 	virtual string *get_ptr();
 	static int get_count_unique_words();// вернули количество слов в словаре
@@ -80,16 +82,10 @@ Unique_word::~Unique_word()
 	count_unique_words--;
 }
 
-bool Unique_word::operator == (const Unique_word &obj) const
-{
-	return *word == *(obj.word);
-}
-
-Unique_word & Unique_word::operator = (const Unique_word &obj)
+void Unique_word::operator = (const Unique_word &obj)
 {
 	*word = *(obj.word);
 	founded = obj.founded;
-	return *this;
 }
 
 bool Unique_word::get_flag() const
@@ -115,8 +111,8 @@ public:
 	Dict();
 	~Dict();
 
-	iterator find_word(const Unique_word &_word);
-	void add_word(const Unique_word &_word);
+	iterator find_word(char str[]);
+	void add_word(char str[]);
 	void add_all_words(char text[]); //добавить слова из нового текста и удалить те, которых нет теперь
 	friend ostream & operator << (ostream &out, const Dict & dictionary);// вывод словаря
 };
@@ -139,31 +135,33 @@ void Dict::new_text()
 	}
 }
 
-vector<Unique_word>::iterator Dict::find_word(const Unique_word &_word)
+vector<Unique_word>::iterator Dict::find_word(char str[])
 {
 	iterator it = begin();
 	while (it != end())
 	{
-		if (*it == _word)
+		if (*it == str)
 			break;
 		++it;
 	}
 	return it;
 }
 
-void Dict::add_word(const Unique_word &_word) // добавить слово
+void Dict::add_word(char str[]) // добавить слово
 {
 
-	iterator it = find_word(_word); //равен результату поиска слова
+	iterator it = find_word(str); //равен результату поиска слова
 	if (empty()) //если словарь пуст 
 	{
+		Unique_word temp(str);
 		resize(1);
-		operator[](0) = _word;
+		operator[](0) = temp;
 	}
 	else if (it == end()) // если искомый объект ненайден - равен итератору, вслед за концом веткора
 	{
+		Unique_word temp(str);
 		resize(size() + 1);
-		operator[](size() - 1) = _word;//вставили элемент в конец словаря
+		operator[](size() - 1) = temp;//вставили элемент в конец словаря
 	}
 	else if (!it->founded) // если слово есть, но текст новый, тогда тру
 	{
@@ -192,8 +190,7 @@ void Dict::add_all_words(char text[])
 				len_word++;
 			}
 			temp_str[len_word] = '\0';
-			Unique_word temp1(temp_str);	
-			add_word(temp1);
+			add_word(temp_str);
 		}
 		if (text[i] == '\0')
 			break;
